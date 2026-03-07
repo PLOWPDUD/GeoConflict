@@ -39,9 +39,16 @@ export const HomeScreen: React.FC<Props> = ({ onStart }) => {
             placeholder="Enter Room Name or ID"
             className="w-full p-4 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500"
           />
+          <input
+            type="text"
+            value={settings.playerName}
+            onChange={(e) => setSettings({...settings, playerName: e.target.value})}
+            placeholder="Your Name"
+            className="w-full p-4 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500"
+          />
           <div className="flex gap-4 w-full">
             <button onClick={() => setView('main')} className="flex-1 p-4 bg-slate-800 hover:bg-slate-700 text-white rounded-xl">Back</button>
-            <button onClick={() => roomName && onStart(MapMode.Custom, roomName)} className="flex-1 p-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl">Join</button>
+            <button onClick={() => roomName && settings.playerName && onStart(MapMode.Custom, roomName, settings)} className="flex-1 p-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl">Join</button>
           </div>
         </div>
       </div>

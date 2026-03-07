@@ -214,8 +214,13 @@ export default function App() {
       engineRef.current.updateCountry(id, updates);
       setTickCount(c => c + 1);
     });
+    socket.on("room:user-joined", (userId) => {
+      console.log(`User ${userId} joined the room.`);
+      // Optional: add a UI notification here
+    });
     return () => {
       socket.off("country:update");
+      socket.off("room:user-joined");
     };
   }, []);
 
