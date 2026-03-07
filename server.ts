@@ -8,6 +8,7 @@ async function startServer() {
   const httpServer = createServer(app);
   const io = new Server(httpServer);
   const PORT = 3000;
+  const rooms = new Map<string, { creatorId: string; settings: any }>();
 
   // API routes FIRST
   app.get("/api/health", (req, res) => {
@@ -20,6 +21,7 @@ async function startServer() {
 
     socket.on("disconnect", () => {
       console.log("user disconnected:", socket.id);
+      // Room persistence is handled by socket.io; we do not delete rooms on creator disconnect.
     });
 
     socket.on("room:join", ({ roomName, settings }) => {
@@ -27,8 +29,8 @@ async function startServer() {
         console.log(`User ${socket.id} joined/created room: ${roomName} with settings:`, settings);
         
         // Store room settings if it's a new room
-        if (settings) {
-            // In a real app, you'd store this in a database or in-memory map
+        if (settings && !rooms.has(roomName)) {
+            rooms.set(roomName, { creatorId: socket.id, settings });
             console.log(`Room ${roomName} created with settings:`, settings);
         }
         

@@ -22,6 +22,7 @@ import { SpawnModal } from './components/SpawnModal';
 import { CountryInspector } from './components/CountryInspector';
 import { EventLog } from './components/EventLog';
 import { HomeScreen } from './components/HomeScreen';
+import { ConqueredModal } from './components/ConqueredModal';
 import { MapMode, ToolType, TerrainType, Country } from './types';
 
 const socket = io();
@@ -56,6 +57,7 @@ export default function App() {
   const [mapMode, setMapMode] = useState<MapMode>(MapMode.World);
   const [tool, setTool] = useState<ToolType>(ToolType.SpawnCountry);
   const [isRunning, setIsRunning] = useState(false);
+  const [isMultiplayer, setIsMultiplayer] = useState(false);
   const [engine, setEngine] = useState<SimulationEngine>(() => createEngine(MapMode.World));
   
   // UI State
@@ -67,6 +69,9 @@ export default function App() {
   const [selectedCountryId, setSelectedCountryId] = useState<number | null>(null);
   const [godModePaintingId, setGodModePaintingId] = useState<number | null>(null);
 
+  const [isConquered, setIsConquered] = useState(false);
+  const [showConqueredModal, setShowConqueredModal] = useState(false);
+  
   // Refs for the loop
   const engineRef = useRef(engine);
   const animationFrameRef = useRef<number>();
@@ -78,6 +83,8 @@ export default function App() {
     engineRef.current = newEngine;
     setTickCount(0);
     setIsRunning(false);
+    setIsConquered(false);
+    setShowConqueredModal(false);
     setSelectedCountryId(null);
     setGodModePaintingId(null);
   }, [mapMode]);
@@ -94,6 +101,22 @@ export default function App() {
     if (!isRunning) return;
     const loop = () => {
       engineRef.current.tick();
+      
+      // Multiplayer win condition: only one country left
+      if (isMultiplayer) {
+          const activeCountries = engineRef.current.countries.filter(c => c.score > 0);
+          if (activeCountries.length <= 1) {
+              setIsRunning(false);
+          }
+
+          // Check if player is conquered
+          const playerCountry = engineRef.current.countries.find(c => c.isPlayer);
+          if (playerCountry && playerCountry.score === 0 && !isConquered) {
+              setIsConquered(true);
+              setShowConqueredModal(true);
+          }
+      }
+
       // Update react state if countries exist or events happened
       if (engineRef.current.countries.length > 0 || engineRef.current.events.length > 0) {
            setTickCount(prev => prev + 1);
@@ -104,7 +127,7 @@ export default function App() {
     return () => {
       if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
     };
-  }, [isRunning]);
+  }, [isRunning, isMultiplayer, isConquered]);
 
   // Handle Canvas Interactivity
   const handleInteract = (x: number, y: number) => {
@@ -241,24 +264,42 @@ export default function App() {
 
       if (roomName) {
           socket.emit("room:join", { roomName, settings });
+          setIsMultiplayer(true);
+          setIsRunning(true); // Auto-start in multiplayer
+      } else {
+          setIsMultiplayer(false);
       }
   };
 
-  // Effect to spawn player when game starts
+  // Effect to spawn player and bots when game starts
   useEffect(() => {
       if (screen === 'game' && settingsRef.current?.playerName) {
           const eng = engineRef.current;
-          // Find a random land cell
-          let x, y;
-          do {
-              x = Math.floor(Math.random() * MAP_WIDTH);
-              y = Math.floor(Math.random() * MAP_HEIGHT);
-          } while (eng.getTerrainAt(x, y) !== TerrainType.Land);
           
-          eng.spawnCountry(x, y, settingsRef.current.playerName, '#FF0000');
-          // Set as player
+          // Helper to find random land cell
+          const findLandCell = () => {
+              let x, y;
+              do {
+                  x = Math.floor(Math.random() * MAP_WIDTH);
+                  y = Math.floor(Math.random() * MAP_HEIGHT);
+              } while (eng.cells[eng.getIndex(x, y)].terrain !== TerrainType.Land);
+              return { x, y };
+          };
+
+          // Spawn Player
+          const playerCell = findLandCell();
+          eng.spawnCountry(playerCell.x, playerCell.y, settingsRef.current.playerName, '#FF0000');
           const newCountry = eng.countries[eng.countries.length - 1];
           eng.setPlayer(newCountry.id);
+
+          // Spawn Bots
+          const botCount = settingsRef.current.botCount || 0;
+          for (let i = 0; i < botCount; i++) {
+              const botCell = findLandCell();
+              const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16);
+              eng.spawnCountry(botCell.x, botCell.y, `Bot ${i + 1}`, randomColor);
+          }
+
           setTickCount(c => c + 1);
       }
   }, [screen]);
@@ -287,7 +328,11 @@ export default function App() {
              if (t !== ToolType.PaintTerritory) setGodModePaintingId(null);
         }}
         isRunning={isRunning}
-        toggleRun={() => setIsRunning(!isRunning)}
+        isMultiplayer={isMultiplayer}
+        toggleRun={() => {
+            if (isMultiplayer) return;
+            setIsRunning(!isRunning);
+        }}
         onGenerate={handleGenerate}
         brushSize={brushSize}
         setBrushSize={setBrushSize}
@@ -309,6 +354,13 @@ export default function App() {
               y={spawnLocation.y} 
               onConfirm={handleSpawnConfirm} 
               onCancel={() => setSpawnLocation(null)}
+          />
+      )}
+
+      {showConqueredModal && (
+          <ConqueredModal 
+              onLeave={() => window.location.reload()}
+              onWatch={() => setShowConqueredModal(false)}
           />
       )}
 

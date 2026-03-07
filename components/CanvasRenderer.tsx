@@ -116,6 +116,39 @@ export const CanvasRenderer: React.FC<Props> = ({ engine, onInteract, width, hei
           ctx.imageSmoothingEnabled = false;
           ctx.drawImage(buffer, 0, 0);
           
+          // Draw Borders
+          ctx.strokeStyle = 'black';
+          ctx.lineWidth = 1 / viewport.scale;
+          
+          const wars = new Set(engine.activeWars);
+          const isAtWar = (id1: number, id2: number) => wars.has(`${id1}-${id2}`) || wars.has(`${id2}-${id1}`);
+          
+          for (let i = 0; i < cells.length; i++) {
+              const c = cells[i];
+              if (!c.ownerId) continue; 
+  
+              const cx = i % width;
+              const cy = Math.floor(i / width);
+              
+              // Check Right
+              if (cx + 1 < width) {
+                  const right = cells[i + 1];
+                  if (right.ownerId && c.ownerId !== right.ownerId) {
+                      ctx.setLineDash(isAtWar(c.ownerId, right.ownerId) ? [2 / viewport.scale, 2 / viewport.scale] : []);
+                      ctx.beginPath(); ctx.moveTo(cx + 1, cy); ctx.lineTo(cx + 1, cy + 1); ctx.stroke();
+                  }
+              }
+              // Check Bottom
+              if (cy + 1 < height) {
+                  const bottom = cells[i + width];
+                  if (bottom.ownerId && c.ownerId !== bottom.ownerId) {
+                      ctx.setLineDash(isAtWar(c.ownerId, bottom.ownerId) ? [2 / viewport.scale, 2 / viewport.scale] : []);
+                      ctx.beginPath(); ctx.moveTo(cx, cy + 1); ctx.lineTo(cx + 1, cy + 1); ctx.stroke();
+                  }
+              }
+          }
+          ctx.setLineDash([]); // Reset
+          
           ctx.restore();
 
           // 3. Render City Names (Overlay)
@@ -428,11 +461,10 @@ export const CanvasRenderer: React.FC<Props> = ({ engine, onInteract, width, hei
   // Touch Handling
   const handleTouchStart = (e: React.TouchEvent) => {
       if (e.touches.length === 2) {
-          // Pinch Zoom Start
+          // Pinch Zoom / Pan Start
           const t1 = e.touches[0];
           const t2 = e.touches[1];
-          const dist = Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
-          touchDist.current = dist;
+          touchDist.current = Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
           lastPos.current = { 
             x: (t1.clientX + t2.clientX) / 2, 
             y: (t1.clientY + t2.clientY) / 2 
@@ -448,33 +480,31 @@ export const CanvasRenderer: React.FC<Props> = ({ engine, onInteract, width, hei
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-      if (e.touches.length === 2) {
+      if (e.touches.length === 2 && touchDist.current && lastPos.current) {
           // Pinch Zoom / Pan
           const t1 = e.touches[0];
           const t2 = e.touches[1];
           const dist = Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
           const center = { x: (t1.clientX + t2.clientX) / 2, y: (t1.clientY + t2.clientY) / 2 };
 
-          if (touchDist.current && lastPos.current) {
-              // Zoom
-              const scaleFactor = dist / touchDist.current;
-              const newScale = Math.min(Math.max(0.5, viewport.scale * scaleFactor), 30);
-              
-              // Pan
-              const dx = center.x - lastPos.current.x;
-              const dy = center.y - lastPos.current.y;
+          // Zoom
+          const scaleFactor = dist / touchDist.current;
+          const newScale = Math.min(Math.max(0.5, viewport.scale * scaleFactor), 30);
+          
+          // Pan
+          const dx = center.x - lastPos.current.x;
+          const dy = center.y - lastPos.current.y;
 
-              // Simplified: Apply pan then scale
-              const rect = canvasRef.current!.getBoundingClientRect();
-              const pinchX = center.x - rect.left;
-              const pinchY = center.y - rect.top;
-              
-              const scaleRatio = newScale / viewport.scale;
-              const newX = pinchX - (pinchX - (viewport.x + dx)) * scaleRatio;
-              const newY = pinchY - (pinchY - (viewport.y + dy)) * scaleRatio;
+          // Apply pan and zoom
+          const rect = canvasRef.current!.getBoundingClientRect();
+          const pinchX = center.x - rect.left;
+          const pinchY = center.y - rect.top;
+          
+          const scaleRatio = newScale / viewport.scale;
+          const newX = pinchX - (pinchX - (viewport.x + dx)) * scaleRatio;
+          const newY = pinchY - (pinchY - (viewport.y + dy)) * scaleRatio;
 
-              setViewport({ x: newX, y: newY, scale: newScale });
-          }
+          setViewport({ x: newX, y: newY, scale: newScale });
           
           touchDist.current = dist;
           lastPos.current = center;

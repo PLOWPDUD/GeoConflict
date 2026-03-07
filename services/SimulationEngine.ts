@@ -715,6 +715,12 @@ export class SimulationEngine {
                   target.defense = 20;
                   this.modifiedCells.add(neighborIdx); // Track change
 
+                  const attacker = this.countries.find(c => c.id === cell.ownerId);
+                  const defender = this.countries.find(c => c.id === oldOwnerId);
+                  if (attacker && defender) {
+                      this.logEvent(`${attacker.name} captured territory from ${defender.name}.`, 'war');
+                  }
+
                   // Capital Relocation Logic
                   if (oldOwnerId) {
                       const defender = this.countries.find(c => c.id === oldOwnerId);
@@ -735,9 +741,11 @@ export class SimulationEngine {
                                   this.logEvent(`${defender.name} moved their capital to ${newCapital.name}.`, 'spawn');
                               } else {
                                   defender.capitalId = null;
+                                  this.logEvent(`${defender.name} has collapsed!`, 'annex');
                               }
                           } else {
                               defender.capitalId = null;
+                              this.logEvent(`${defender.name} has collapsed!`, 'annex');
                           }
                       }
                   }

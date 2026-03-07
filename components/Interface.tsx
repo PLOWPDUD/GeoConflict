@@ -23,6 +23,7 @@ interface Props {
   tool: ToolType;
   setTool: (t: ToolType) => void;
   isRunning: boolean;
+  isMultiplayer: boolean;
   toggleRun: () => void;
   onGenerate: () => void;
   brushSize: number;
@@ -35,6 +36,7 @@ export const Interface: React.FC<Props> = ({
   tool,
   setTool,
   isRunning,
+  isMultiplayer,
   toggleRun,
   onGenerate,
   brushSize,
@@ -87,21 +89,23 @@ export const Interface: React.FC<Props> = ({
                 <div className="bg-slate-900/90 backdrop-blur-sm border border-slate-700 rounded-lg p-1.5 shadow-xl flex items-center gap-1">
                 <button 
                     onClick={toggleRun}
-                    className={`p-3 rounded-md transition-all active:scale-95 ${isRunning ? 'bg-amber-500/20 text-amber-500 hover:bg-amber-500/30' : 'bg-green-500/20 text-green-500 hover:bg-green-500/30'}`}
+                    disabled={isMultiplayer}
+                    className={`p-4 rounded-lg transition-all active:scale-95 ${isMultiplayer ? 'opacity-50 cursor-not-allowed' : ''} ${isRunning ? 'bg-amber-500/20 text-amber-500 hover:bg-amber-500/30' : 'bg-green-500/20 text-green-500 hover:bg-green-500/30'}`}
                     aria-label={isRunning ? "Pause" : "Play"}
-                    title={isRunning ? "Pause Simulation" : "Start Simulation"}
+                    title={isMultiplayer ? "Cannot pause in multiplayer" : (isRunning ? "Pause Simulation" : "Start Simulation")}
                 >
-                    {isRunning ? <Pause className="w-6 h-6 fill-current" /> : <Play className="w-6 h-6 fill-current" />}
+                    {isRunning ? <Pause className="w-8 h-8 fill-current" /> : <Play className="w-8 h-8 fill-current" />}
                 </button>
                 
-                <div className="h-8 w-px bg-slate-700 mx-1"></div>
+                <div className="h-12 w-px bg-slate-700 mx-1"></div>
 
                 <button 
                     onClick={onGenerate}
-                    className="p-3 text-slate-400 hover:text-white hover:bg-slate-800 rounded-md transition-colors active:scale-95"
-                    title="Regenerate Map"
+                    disabled={isMultiplayer}
+                    className={`p-4 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors active:scale-95 ${isMultiplayer ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    title={isMultiplayer ? "Cannot regenerate map in multiplayer" : "Regenerate Map"}
                 >
-                    <RefreshCw className="w-6 h-6" />
+                    <RefreshCw className="w-8 h-8" />
                 </button>
                 </div>
 
@@ -109,22 +113,22 @@ export const Interface: React.FC<Props> = ({
                 {(tool === ToolType.BrushLand || tool === ToolType.BrushMountain || tool === ToolType.BrushWater || tool === ToolType.PaintTerritory) && (
                     <button
                     onClick={cycleBrushSize}
-                    className="p-3 rounded-lg border shadow-xl transition-all active:scale-95 bg-slate-900/90 border-slate-700 text-slate-400 hover:text-white flex flex-col items-center justify-center gap-0.5 min-w-[50px]"
+                    className="p-4 rounded-lg border shadow-xl transition-all active:scale-95 bg-slate-900/90 border-slate-700 text-slate-400 hover:text-white flex flex-col items-center justify-center gap-1 min-w-[60px]"
                     title="Cycle Brush Size"
                 >
-                    <div className="h-5 flex items-center justify-center">
+                    <div className="h-6 flex items-center justify-center">
                         <Circle className={`${getBrushIconSize()} fill-current`} />
                     </div>
-                    <span className="text-[9px] font-mono leading-none">{brushSize}x</span>
+                    <span className="text-[10px] font-mono leading-none">{brushSize}x</span>
                 </button>
                 )}
 
                 <button
                     onClick={() => setShowSettings(!showSettings)}
-                    className={`p-3 rounded-lg border shadow-xl transition-colors backdrop-blur-sm active:scale-95 ${showSettings ? 'bg-slate-800 border-indigo-500 text-indigo-400' : 'bg-slate-900/90 border-slate-700 text-slate-400 hover:text-white'}`}
+                    className={`p-4 rounded-lg border shadow-xl transition-colors backdrop-blur-sm active:scale-95 ${showSettings ? 'bg-slate-800 border-indigo-500 text-indigo-400' : 'bg-slate-900/90 border-slate-700 text-slate-400 hover:text-white'}`}
                     title="Map Settings & Modes"
                 >
-                    <Settings className="w-6 h-6" />
+                    <Settings className="w-8 h-8" />
                 </button>
             </div>
 
@@ -136,11 +140,13 @@ export const Interface: React.FC<Props> = ({
                 {mapModes.map(mode => (
                 <button
                     key={mode.id}
+                    disabled={isMultiplayer}
                     onClick={() => {
+                        if (isMultiplayer) return;
                         setMapMode(mode.id);
                         setShowSettings(false);
                     }}
-                    className={`flex items-center gap-3 px-3 py-3 rounded-md text-sm font-medium transition-all active:scale-95 ${mapMode === mode.id ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'}`}
+                    className={`flex items-center gap-3 px-3 py-3 rounded-md text-sm font-medium transition-all active:scale-95 ${isMultiplayer ? 'opacity-50 cursor-not-allowed' : ''} ${mapMode === mode.id ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'}`}
                 >
                     <mode.icon className="w-4 h-4" />
                     {mode.label}

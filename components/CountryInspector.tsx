@@ -46,7 +46,7 @@ export const CountryInspector: React.FC<Props> = ({
         </div>
 
         <div className="space-y-3">
-             <div className="grid grid-cols-3 gap-2 text-xs text-slate-400">
+             <div className="grid grid-cols-2 gap-2 text-xs text-slate-400">
                 <div className="bg-slate-800 p-2 rounded">
                     <div className="uppercase text-[10px] mb-0.5">Size</div>
                     <div className="text-white font-mono text-sm">{country.score}</div>
@@ -58,6 +58,10 @@ export const CountryInspector: React.FC<Props> = ({
                 <div className="bg-slate-800 p-2 rounded">
                     <div className="uppercase text-[10px] mb-0.5">Manpower</div>
                     <div className="text-white font-mono text-sm">{country.manpower}</div>
+                </div>
+                <div className="bg-slate-800 p-2 rounded">
+                    <div className="uppercase text-[10px] mb-0.5">Last War</div>
+                    <div className="text-white font-mono text-sm">{country.lastWarTick}</div>
                 </div>
              </div>
              

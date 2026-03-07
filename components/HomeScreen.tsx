@@ -51,30 +51,37 @@ export const HomeScreen: React.FC<Props> = ({ onStart }) => {
   if (view === 'create') {
     return (
       <div className="w-screen h-screen bg-slate-950 flex flex-col items-center justify-center relative overflow-hidden">
-        <div className="z-10 flex flex-col items-center gap-4 animate-in fade-in zoom-in duration-300 w-full max-w-sm px-4">
+        <div className="z-10 flex flex-col items-center gap-6 animate-in fade-in zoom-in duration-300 w-full max-w-2xl px-4">
           <h2 className="text-3xl font-bold text-white">Create Room</h2>
-          <input type="text" value={roomName} onChange={(e) => setRoomName(e.target.value)} placeholder="Room Name" className="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-white" />
-          <input type="text" value={settings.playerName} onChange={(e) => setSettings({...settings, playerName: e.target.value})} placeholder="Your Name" className="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-white" />
           
-          <select value={settings.map} onChange={(e) => setSettings({...settings, map: e.target.value as any})} className="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-white">
-            <option value="Procedural">Procedural World</option>
-            <option value="True Earth">True Earth</option>
-            <option value="Europe">Europe</option>
-          </select>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+            <div className="space-y-4">
+              <input type="text" value={roomName} onChange={(e) => setRoomName(e.target.value)} placeholder="Room Name" className="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-white" />
+              <input type="text" value={settings.playerName} onChange={(e) => setSettings({...settings, playerName: e.target.value})} placeholder="Your Name" className="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-white" />
+              
+              <select value={settings.map} onChange={(e) => setSettings({...settings, map: e.target.value as any})} className="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-white">
+                <option value="Procedural">Procedural World</option>
+                <option value="True Earth">True Earth</option>
+                <option value="Europe">Europe</option>
+              </select>
+              
+              <select value={settings.botDifficulty} onChange={(e) => setSettings({...settings, botDifficulty: e.target.value as any})} className="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-white">
+                <option value="Easy">Easy</option>
+                <option value="Impossible">Impossible</option>
+              </select>
+            </div>
 
-          <label className="text-slate-400 text-sm w-full">Bot Count: {settings.botCount}</label>
-          <input type="range" min="0" max="50" value={settings.botCount} onChange={(e) => setSettings({...settings, botCount: parseInt(e.target.value)})} className="w-full" />
-          
-          <label className="text-slate-400 text-sm w-full">Max People: {settings.maxPeople}</label>
-          <input type="range" min="1" max="10" value={settings.maxPeople} onChange={(e) => setSettings({...settings, maxPeople: parseInt(e.target.value)})} className="w-full" />
-          
-          <label className="text-slate-400 text-sm w-full">Unit Count: {settings.unitCount}</label>
-          <input type="range" min="10" max="500" step="10" value={settings.unitCount} onChange={(e) => setSettings({...settings, unitCount: parseInt(e.target.value)})} className="w-full" />
-          
-          <select value={settings.botDifficulty} onChange={(e) => setSettings({...settings, botDifficulty: e.target.value as any})} className="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-white">
-            <option value="Easy">Easy</option>
-            <option value="Impossible">Impossible</option>
-          </select>
+            <div className="space-y-4">
+              <label className="text-slate-400 text-sm w-full">Bot Count: {settings.botCount}</label>
+              <input type="range" min="0" max="50" value={settings.botCount} onChange={(e) => setSettings({...settings, botCount: parseInt(e.target.value)})} className="w-full" />
+              
+              <label className="text-slate-400 text-sm w-full">Max People: {settings.maxPeople}</label>
+              <input type="range" min="1" max="10" value={settings.maxPeople} onChange={(e) => setSettings({...settings, maxPeople: parseInt(e.target.value)})} className="w-full" />
+              
+              <label className="text-slate-400 text-sm w-full">Unit Count: {settings.unitCount}</label>
+              <input type="range" min="10" max="500" step="10" value={settings.unitCount} onChange={(e) => setSettings({...settings, unitCount: parseInt(e.target.value)})} className="w-full" />
+            </div>
+          </div>
 
           <div className="flex gap-4 w-full mt-4">
             <button onClick={() => setView('main')} className="flex-1 p-4 bg-slate-800 hover:bg-slate-700 text-white rounded-xl">Back</button>
