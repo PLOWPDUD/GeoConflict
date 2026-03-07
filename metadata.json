@@ -1,0 +1,5 @@
+{
+  "name": "GeoConflict Sim",
+  "description": "A high-performance map simulation engine where AI countries expand, fight, and form alliances on a dynamic grid.",
+  "requestFramePermissions": []
+}
