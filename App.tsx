@@ -71,6 +71,7 @@ export default function App() {
 
   const [isConquered, setIsConquered] = useState(false);
   const [showConqueredModal, setShowConqueredModal] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   // Refs for the loop
   const engineRef = useRef(engine);
@@ -87,6 +88,7 @@ export default function App() {
     setShowConqueredModal(false);
     setSelectedCountryId(null);
     setGodModePaintingId(null);
+    setError(null);
   }, [mapMode]);
 
   // Effect to regenerate when mapMode changes IF we are already in game
@@ -218,9 +220,19 @@ export default function App() {
       console.log(`User ${userId} joined the room.`);
       // Optional: add a UI notification here
     });
+    socket.on("room:error", (message) => {
+      setError(message);
+      setIsMultiplayer(false);
+    });
+    socket.on("room:joined", () => {
+      setScreen('game');
+      setIsRunning(true);
+    });
     return () => {
       socket.off("country:update");
       socket.off("room:user-joined");
+      socket.off("room:error");
+      socket.off("room:joined");
     };
   }, []);
 
@@ -255,7 +267,7 @@ export default function App() {
   const handleStartGame = (mode: MapMode, roomName?: string, settings?: any) => {
       settingsRef.current = settings;
       setMapMode(mode);
-      setScreen('game');
+      setError(null);
       
       // If settings exist, use the map setting
       if (settings?.map) {
@@ -270,9 +282,10 @@ export default function App() {
       if (roomName) {
           socket.emit("room:join", { roomName, settings });
           setIsMultiplayer(true);
-          setIsRunning(true); // Auto-start in multiplayer
       } else {
           setIsMultiplayer(false);
+          setScreen('game');
+          setIsRunning(true);
       }
   };
 
@@ -318,7 +331,7 @@ export default function App() {
 
 
   if (screen === 'home') {
-      return <HomeScreen onStart={handleStartGame} />;
+      return <HomeScreen onStart={handleStartGame} onError={error || undefined} />;
   }
 
   return (

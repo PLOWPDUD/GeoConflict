@@ -13,9 +13,10 @@ interface RoomSettings {
 
 interface Props {
   onStart: (mode: MapMode, roomName?: string, settings?: RoomSettings) => void;
+  onError?: string;
 }
 
-export const HomeScreen: React.FC<Props> = ({ onStart }) => {
+export const HomeScreen: React.FC<Props> = ({ onStart, onError }) => {
   const [view, setView] = useState<'main' | 'join' | 'create'>('main');
   const [roomName, setRoomName] = useState('');
   const [settings, setSettings] = useState<RoomSettings>({
@@ -32,6 +33,7 @@ export const HomeScreen: React.FC<Props> = ({ onStart }) => {
       <div className="w-screen h-screen bg-slate-950 flex flex-col items-center justify-center relative overflow-hidden">
         <div className="z-10 flex flex-col items-center gap-6 animate-in fade-in zoom-in duration-300 w-full max-w-sm px-4">
           <h2 className="text-3xl font-bold text-white">Join Room</h2>
+          {onError && <p className="text-red-500">{onError}</p>}
           <input
             type="text"
             value={roomName}
