@@ -45,12 +45,13 @@ export const CanvasRenderer: React.FC<Props> = ({ engine, onInteract, width, hei
     let animationFrameId: number;
 
     const render = () => {
+      const { cells, countries } = engine;
+      
       // 1. Render Map to Buffer (Low Res)
       const buffer = bufferCanvasRef.current;
       if (buffer) {
           const bCtx = buffer.getContext('2d');
           if (bCtx) {
-             const { cells, countries } = engine;
              const imageData = bCtx.createImageData(width, height);
              const data = imageData.data;
              
