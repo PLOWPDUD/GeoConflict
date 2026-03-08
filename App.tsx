@@ -25,7 +25,7 @@ import { HomeScreen } from './components/HomeScreen';
 import { ConqueredModal } from './components/ConqueredModal';
 import { MapMode, ToolType, TerrainType, Country } from './types';
 
-const socket = io();
+const socket = io(window.location.origin);
 
 // Initial Engine Setup
 const createEngine = (mode: MapMode) => {

@@ -6,7 +6,12 @@ import { Server } from "socket.io";
 async function startServer() {
   const app = express();
   const httpServer = createServer(app);
-  const io = new Server(httpServer);
+  const io = new Server(httpServer, {
+    cors: {
+      origin: "*",
+      methods: ["GET", "POST"]
+    }
+  });
   const PORT = 3000;
   const rooms = new Map<string, { creatorId: string; settings: any }>();
 
