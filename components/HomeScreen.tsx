@@ -30,7 +30,7 @@ export const HomeScreen: React.FC<Props> = ({ onStart, onError }) => {
 
   if (view === 'join') {
     return (
-      <div className="w-screen h-screen bg-slate-950 flex flex-col items-center justify-center relative overflow-hidden">
+      <div className="w-screen min-h-screen bg-slate-950 flex flex-col items-center justify-center relative overflow-y-auto py-8">
         <div className="z-10 flex flex-col items-center gap-6 animate-in fade-in zoom-in duration-300 w-full max-w-sm px-4">
           <h2 className="text-3xl font-bold text-white">Join Room</h2>
           {onError && <p className="text-red-500">{onError}</p>}
@@ -59,7 +59,7 @@ export const HomeScreen: React.FC<Props> = ({ onStart, onError }) => {
 
   if (view === 'create') {
     return (
-      <div className="w-screen h-screen bg-slate-950 flex flex-col items-center justify-center relative overflow-hidden">
+      <div className="w-screen min-h-screen bg-slate-950 flex flex-col items-center justify-center relative overflow-y-auto py-8">
         <div className="z-10 flex flex-col items-center gap-6 animate-in fade-in zoom-in duration-300 w-full max-w-2xl px-4">
           <h2 className="text-3xl font-bold text-white">Create Room</h2>
           
@@ -102,7 +102,7 @@ export const HomeScreen: React.FC<Props> = ({ onStart, onError }) => {
   }
 
   return (
-    <div className="w-screen h-screen bg-slate-950 flex flex-col items-center justify-center relative overflow-hidden">
+    <div className="w-screen min-h-screen bg-slate-950 flex flex-col items-center justify-center relative overflow-y-auto py-8">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-slate-950 to-slate-950 z-0"></div>
       
       <div className="z-10 flex flex-col items-center gap-8 animate-in fade-in zoom-in duration-500">
