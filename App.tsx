@@ -58,6 +58,7 @@ export default function App() {
   const [tool, setTool] = useState<ToolType>(ToolType.SpawnCountry);
   const [isRunning, setIsRunning] = useState(false);
   const [isMultiplayer, setIsMultiplayer] = useState(false);
+  const [roomName, setRoomName] = useState<string | null>(null);
   const [engine, setEngine] = useState<SimulationEngine>(() => createEngine(MapMode.World));
   
   // UI State
@@ -192,7 +193,10 @@ export default function App() {
   // Modal Callbacks
   const handleSpawnConfirm = (name: string, color: string) => {
       if (spawnLocation) {
-          engineRef.current.spawnCountry(spawnLocation.x, spawnLocation.y, name, color);
+          const newCountry = engineRef.current.spawnCountry(spawnLocation.x, spawnLocation.y, name, color);
+          if (isMultiplayer && roomName) {
+              socket.emit("country:spawn", { roomName, country: newCountry });
+          }
           setTickCount(c => c + 1);
           setSpawnLocation(null);
       }
@@ -207,7 +211,9 @@ export default function App() {
   
   const handleUpdateCountry = (id: number, updates: Partial<Country>) => {
       engineRef.current.updateCountry(id, updates);
-      socket.emit("country:update", { id, updates });
+      if (isMultiplayer && roomName) {
+          socket.emit("country:update", { roomName, id, updates });
+      }
       setTickCount(c => c + 1);
   };
 
@@ -222,9 +228,14 @@ export default function App() {
       engineRef.current.updateCountry(id, updates);
       setTickCount(c => c + 1);
     });
-    socket.on("room:user-joined", (userId) => {
-      console.log(`User ${userId} joined the room.`);
-      // Optional: add a UI notification here
+    socket.on("country:spawned", (country) => {
+      engineRef.current.countries.push(country);
+      setTickCount(c => c + 1);
+    });
+    socket.on("room:state", ({ countries, cities }) => {
+      engineRef.current.countries = countries;
+      engineRef.current.cities = cities;
+      setTickCount(c => c + 1);
     });
     socket.on("room:error", (message) => {
       setError(message);
@@ -293,6 +304,7 @@ export default function App() {
       }
 
       if (roomName) {
+          setRoomName(roomName);
           socket.emit("room:join", { roomName, settings });
           setIsMultiplayer(true);
       } else {
@@ -304,7 +316,7 @@ export default function App() {
 
   // Effect to spawn player and bots when game starts
   useEffect(() => {
-      if (screen === 'game' && settingsRef.current?.playerName) {
+      if (screen === 'game' && settingsRef.current?.playerName && !isMultiplayer) {
           const eng = engineRef.current;
           
           // Helper to find random land cell
@@ -333,7 +345,7 @@ export default function App() {
 
           setTickCount(c => c + 1);
       }
-  }, [screen]);
+  }, [screen, isMultiplayer]);
 
   // Need to store settings in a ref to access in useEffect
   const settingsRef = useRef<any>(null);

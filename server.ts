@@ -13,7 +13,7 @@ async function startServer() {
     }
   });
   const PORT = 3000;
-  const rooms = new Map<string, { creatorId: string; settings: any }>();
+  const rooms = new Map<string, { creatorId: string; settings: any; countries: any[]; cities: any[]; cells: any[] }>();
 
   // API routes FIRST
   app.get("/api/health", (req, res) => {
@@ -26,37 +26,38 @@ async function startServer() {
 
     socket.on("disconnect", () => {
       console.log("user disconnected:", socket.id);
-      // Room persistence is handled by socket.io; we do not delete rooms on creator disconnect.
     });
 
     socket.on("room:join", ({ roomName, settings }) => {
         socket.join(roomName);
-        console.log(`User ${socket.id} joined/created room: ${roomName} with settings:`, settings);
         
-        // Store room settings if it's a new room
-        if (settings && !rooms.has(roomName)) {
-            rooms.set(roomName, { creatorId: socket.id, settings });
-            console.log(`Room ${roomName} created with settings:`, settings);
-            
-            // Start the game in 5 seconds
-            setTimeout(() => {
-                io.to(roomName).emit("room:start");
-                console.log(`Room ${roomName} started`);
-            }, 5000);
+        if (!rooms.has(roomName)) {
+            rooms.set(roomName, { creatorId: socket.id, settings, countries: [], cities: [], cells: [] });
         }
+        
+        const room = rooms.get(roomName)!;
+        socket.emit("room:state", { countries: room.countries, cities: room.cities });
         
         socket.to(roomName).emit("room:user-joined", socket.id);
         socket.emit("room:joined");
     });
 
-    socket.on("country:update", (data) => {
-        console.log("country update:", data);
-        // Broadcast to everyone in the same room
-        const room = Array.from(socket.rooms).find(r => r !== socket.id);
+    socket.on("country:spawn", ({ roomName, country }) => {
+        const room = rooms.get(roomName);
         if (room) {
-            socket.to(room).emit("country:update", data);
-        } else {
-            socket.broadcast.emit("country:update", data);
+            room.countries.push(country);
+            io.to(roomName).emit("country:spawned", country);
+        }
+    });
+
+    socket.on("country:update", ({ roomName, id, updates }) => {
+        const room = rooms.get(roomName);
+        if (room) {
+            const country = room.countries.find(c => c.id === id);
+            if (country) {
+                Object.assign(country, updates);
+                io.to(roomName).emit("country:update", { id, updates });
+            }
         }
     });
   });
