@@ -212,6 +212,12 @@ export default function App() {
   };
 
   useEffect(() => {
+    socket.on("connect", () => {
+      console.log("Socket connected:", socket.id);
+    });
+    socket.on("connect_error", (err) => {
+      console.error("Socket connection error:", err);
+    });
     socket.on("country:update", ({ id, updates }) => {
       engineRef.current.updateCountry(id, updates);
       setTickCount(c => c + 1);
@@ -228,11 +234,18 @@ export default function App() {
       setScreen('game');
       setIsRunning(true);
     });
+    socket.on("room:start", () => {
+      setScreen('game');
+      setIsRunning(true);
+    });
     return () => {
+      socket.off("connect");
+      socket.off("connect_error");
       socket.off("country:update");
       socket.off("room:user-joined");
       socket.off("room:error");
       socket.off("room:joined");
+      socket.off("room:start");
     };
   }, []);
 

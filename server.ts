@@ -32,9 +32,16 @@ async function startServer() {
         if (settings && !rooms.has(roomName)) {
             rooms.set(roomName, { creatorId: socket.id, settings });
             console.log(`Room ${roomName} created with settings:`, settings);
+            
+            // Start the game in 5 seconds
+            setTimeout(() => {
+                io.to(roomName).emit("room:start");
+                console.log(`Room ${roomName} started`);
+            }, 5000);
         }
         
         socket.to(roomName).emit("room:user-joined", socket.id);
+        socket.emit("room:joined");
     });
 
     socket.on("country:update", (data) => {
