@@ -12,6 +12,7 @@ interface Props {
   onDeclareWar: (id1: number, id2: number) => void;
   onFormAlliance: (id1: number, id2: number) => void;
   isPainting: boolean;
+  canEdit?: boolean;
 }
 
 export const CountryInspector: React.FC<Props> = ({ 
@@ -23,7 +24,8 @@ export const CountryInspector: React.FC<Props> = ({
   onPaintTerritory,
   onDeclareWar,
   onFormAlliance,
-  isPainting
+  isPainting,
+  canEdit = true
 }) => {
   if (!country) return null;
   return (
@@ -36,8 +38,9 @@ export const CountryInspector: React.FC<Props> = ({
                 <input 
                     type="text" 
                     value={country.name}
+                    disabled={!canEdit}
                     onChange={(e) => onUpdate(country.id, { name: e.target.value })}
-                    className="bg-transparent border-b border-transparent hover:border-slate-500 focus:border-indigo-500 outline-none text-sm font-bold text-white w-32"
+                    className={`bg-transparent border-b border-transparent outline-none text-sm font-bold text-white w-32 ${canEdit ? 'hover:border-slate-500 focus:border-indigo-500' : 'cursor-default'}`}
                 />
             </div>
             <button onClick={onClose} className="text-slate-400 hover:text-white">
@@ -80,6 +83,7 @@ export const CountryInspector: React.FC<Props> = ({
                  </div>
              </div>
 
+             {canEdit && (
              <div className="border-t border-slate-700 my-2 pt-2">
                  <div className="text-[10px] uppercase font-bold text-slate-500 mb-2">God Mode</div>
                  
@@ -114,6 +118,7 @@ export const CountryInspector: React.FC<Props> = ({
                      </div>
                  </div>
              </div>
+             )}
         </div>
     </div>
   );

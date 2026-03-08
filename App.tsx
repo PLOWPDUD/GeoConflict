@@ -63,6 +63,7 @@ export default function App() {
   const [tool, setTool] = useState<ToolType>(ToolType.SpawnCountry);
   const [isRunning, setIsRunning] = useState(false);
   const [isMultiplayer, setIsMultiplayer] = useState(false);
+  const [isHost, setIsHost] = useState(false);
   const [roomName, setRoomName] = useState<string | null>(null);
   const [isConnected, setIsConnected] = useState(socket.connected);
   const [engine, setEngine] = useState<SimulationEngine>(() => createEngine(MapMode.World));
@@ -268,9 +269,10 @@ export default function App() {
       setError(message);
       setIsMultiplayer(false);
     });
-    socket.on("room:joined", () => {
+    socket.on("room:joined", ({ isHost }: { isHost: boolean }) => {
       setScreen('game');
       setIsRunning(true);
+      setIsHost(isHost);
     });
     socket.on("room:start", () => {
       setScreen('game');
@@ -382,6 +384,20 @@ export default function App() {
   }, []);
 
 
+  const handleLeave = () => {
+      if (isMultiplayer && roomName) {
+          socket.emit("room:leave", { roomName });
+          socket.disconnect();
+          socket.connect();
+      }
+      setIsRunning(false);
+      setIsMultiplayer(false);
+      setRoomName(null);
+      setIsHost(false);
+      setScreen('home');
+      handleGenerate();
+  };
+
   if (screen === 'home') {
       return <HomeScreen 
         onStart={handleStartGame} 
@@ -411,6 +427,8 @@ export default function App() {
         brushSize={brushSize}
         setBrushSize={setBrushSize}
         isConnected={isConnected}
+        canEdit={!isMultiplayer || isHost}
+        onLeave={handleLeave}
       />
 
       <CanvasRenderer 
@@ -450,6 +468,7 @@ export default function App() {
               onDeclareWar={handleDeclareWar}
               onFormAlliance={handleFormAlliance}
               isPainting={godModePaintingId === selectedCountryId}
+              canEdit={!isMultiplayer || isHost}
           />
       )}
     </div>

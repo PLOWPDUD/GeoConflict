@@ -39,12 +39,15 @@ async function startServer() {
         socket.emit("room:state", { countries: room.countries, cities: room.cities });
         
         socket.to(roomName).emit("room:user-joined", socket.id);
-        socket.emit("room:joined");
+        socket.emit("room:joined", { isHost: room.creatorId === socket.id });
     });
 
     socket.on("country:spawn", ({ roomName, country }) => {
         const room = rooms.get(roomName);
         if (room) {
+            // Only host can spawn countries in multiplayer
+            if (room.creatorId !== socket.id) return;
+
             room.countries.push(country);
             io.to(roomName).emit("country:spawned", country);
         }
@@ -53,6 +56,9 @@ async function startServer() {
     socket.on("country:update", ({ roomName, id, updates }) => {
         const room = rooms.get(roomName);
         if (room) {
+            // Only host can update countries (God Mode) in multiplayer
+            if (room.creatorId !== socket.id) return;
+
             const country = room.countries.find(c => c.id === id);
             if (country) {
                 Object.assign(country, updates);

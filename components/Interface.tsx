@@ -14,7 +14,8 @@ import {
   Settings,
   MousePointer2,
   Circle,
-  Compass
+  Compass,
+  LogOut
 } from 'lucide-react';
 
 interface Props {
@@ -29,6 +30,8 @@ interface Props {
   brushSize: number;
   setBrushSize: (s: number) => void;
   isConnected?: boolean;
+  canEdit?: boolean;
+  onLeave: () => void;
 }
 
 export const Interface: React.FC<Props> = ({
@@ -43,10 +46,12 @@ export const Interface: React.FC<Props> = ({
   brushSize,
   setBrushSize,
   isConnected = true,
+  canEdit = true,
+  onLeave,
 }) => {
   const [showSettings, setShowSettings] = useState(false);
   
-  const tools = [
+  let tools = [
     { id: ToolType.Select, icon: MousePointer2, label: 'Select' },
     { id: ToolType.SpawnCountry, icon: PlusSquare, label: 'Spawn' },
     { id: ToolType.PlaceCity, icon: Castle, label: 'City' },
@@ -54,6 +59,10 @@ export const Interface: React.FC<Props> = ({
     { id: ToolType.BrushMountain, icon: Mountain, label: 'Mntn' },
     { id: ToolType.BrushSea, icon: Trash2, label: 'Sea' },
   ];
+
+  if (!canEdit) {
+      tools = tools.filter(t => t.id === ToolType.Select);
+  }
 
   const mapModes = [
     { id: MapMode.World, icon: Globe, label: 'Procedural World' },
@@ -131,6 +140,14 @@ export const Interface: React.FC<Props> = ({
                     title="Map Settings & Modes"
                 >
                     <Settings className="w-6 h-6 sm:w-8 sm:h-8" />
+                </button>
+
+                <button
+                    onClick={onLeave}
+                    className="p-3 sm:p-4 rounded-lg border shadow-xl transition-colors backdrop-blur-sm active:scale-95 bg-red-900/80 border-red-700 text-red-200 hover:bg-red-800 hover:text-white"
+                    title="Leave Game"
+                >
+                    <LogOut className="w-6 h-6 sm:w-8 sm:h-8" />
                 </button>
             </div>
 
