@@ -84,28 +84,28 @@ export const Interface: React.FC<Props> = ({
   return (
     <>
       {/* Top Left: Controls & Menu */}
-      <div className="absolute top-4 left-4 flex flex-col gap-2 z-20">
-            <div className="flex gap-2">
+      <div className="fixed top-2 left-2 sm:top-4 sm:left-4 flex flex-col gap-2 z-20">
+            <div className="flex flex-wrap gap-2">
                 <div className="bg-slate-900/90 backdrop-blur-sm border border-slate-700 rounded-lg p-1.5 shadow-xl flex items-center gap-1">
                 <button 
                     onClick={toggleRun}
                     disabled={isMultiplayer}
-                    className={`p-4 rounded-lg transition-all active:scale-95 ${isMultiplayer ? 'opacity-50 cursor-not-allowed' : ''} ${isRunning ? 'bg-amber-500/20 text-amber-500 hover:bg-amber-500/30' : 'bg-green-500/20 text-green-500 hover:bg-green-500/30'}`}
+                    className={`p-3 sm:p-4 rounded-lg transition-all active:scale-95 ${isMultiplayer ? 'opacity-50 cursor-not-allowed' : ''} ${isRunning ? 'bg-amber-500/20 text-amber-500 hover:bg-amber-500/30' : 'bg-green-500/20 text-green-500 hover:bg-green-500/30'}`}
                     aria-label={isRunning ? "Pause" : "Play"}
                     title={isMultiplayer ? "Cannot pause in multiplayer" : (isRunning ? "Pause Simulation" : "Start Simulation")}
                 >
-                    {isRunning ? <Pause className="w-8 h-8 fill-current" /> : <Play className="w-8 h-8 fill-current" />}
+                    {isRunning ? <Pause className="w-6 h-6 sm:w-8 sm:h-8 fill-current" /> : <Play className="w-6 h-6 sm:w-8 sm:h-8 fill-current" />}
                 </button>
                 
-                <div className="h-12 w-px bg-slate-700 mx-1"></div>
+                <div className="h-10 sm:h-12 w-px bg-slate-700 mx-1"></div>
 
                 <button 
                     onClick={onGenerate}
                     disabled={isMultiplayer}
-                    className={`p-4 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors active:scale-95 ${isMultiplayer ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`p-3 sm:p-4 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors active:scale-95 ${isMultiplayer ? 'opacity-50 cursor-not-allowed' : ''}`}
                     title={isMultiplayer ? "Cannot regenerate map in multiplayer" : "Regenerate Map"}
                 >
-                    <RefreshCw className="w-8 h-8" />
+                    <RefreshCw className="w-6 h-6 sm:w-8 sm:h-8" />
                 </button>
                 </div>
 
@@ -113,28 +113,28 @@ export const Interface: React.FC<Props> = ({
                 {(tool === ToolType.BrushLand || tool === ToolType.BrushMountain || tool === ToolType.BrushWater || tool === ToolType.PaintTerritory) && (
                     <button
                     onClick={cycleBrushSize}
-                    className="p-4 rounded-lg border shadow-xl transition-all active:scale-95 bg-slate-900/90 border-slate-700 text-slate-400 hover:text-white flex flex-col items-center justify-center gap-1 min-w-[60px]"
+                    className="p-3 sm:p-4 rounded-lg border shadow-xl transition-all active:scale-95 bg-slate-900/90 border-slate-700 text-slate-400 hover:text-white flex flex-col items-center justify-center gap-1 min-w-[50px] sm:min-w-[60px]"
                     title="Cycle Brush Size"
                 >
-                    <div className="h-6 flex items-center justify-center">
+                    <div className="h-5 sm:h-6 flex items-center justify-center">
                         <Circle className={`${getBrushIconSize()} fill-current`} />
                     </div>
-                    <span className="text-[10px] font-mono leading-none">{brushSize}x</span>
+                    <span className="text-[9px] font-mono leading-none">{brushSize}x</span>
                 </button>
                 )}
 
                 <button
                     onClick={() => setShowSettings(!showSettings)}
-                    className={`p-4 rounded-lg border shadow-xl transition-colors backdrop-blur-sm active:scale-95 ${showSettings ? 'bg-slate-800 border-indigo-500 text-indigo-400' : 'bg-slate-900/90 border-slate-700 text-slate-400 hover:text-white'}`}
+                    className={`p-3 sm:p-4 rounded-lg border shadow-xl transition-colors backdrop-blur-sm active:scale-95 ${showSettings ? 'bg-slate-800 border-indigo-500 text-indigo-400' : 'bg-slate-900/90 border-slate-700 text-slate-400 hover:text-white'}`}
                     title="Map Settings & Modes"
                 >
-                    <Settings className="w-8 h-8" />
+                    <Settings className="w-6 h-6 sm:w-8 sm:h-8" />
                 </button>
             </div>
 
         {/* Expandable Map Generator Menu */}
         {showSettings && (
-            <div className="bg-slate-900/95 backdrop-blur-md border border-slate-700 rounded-lg p-3 shadow-2xl animate-in fade-in slide-in-from-top-2 max-h-[80vh] overflow-y-auto">
+            <div className="bg-slate-900/95 backdrop-blur-md border border-slate-700 rounded-lg p-2 sm:p-3 shadow-2xl animate-in fade-in slide-in-from-top-2 max-h-[60vh] sm:max-h-[80vh] overflow-y-auto w-48 sm:w-64">
             <div className="text-[10px] uppercase text-slate-500 font-bold mb-2 px-1 tracking-wider">Map Mode</div>
             <div className="flex flex-col gap-1">
                 {mapModes.map(mode => (
@@ -146,7 +146,7 @@ export const Interface: React.FC<Props> = ({
                         setMapMode(mode.id);
                         setShowSettings(false);
                     }}
-                    className={`flex items-center gap-3 px-3 py-3 rounded-md text-sm font-medium transition-all active:scale-95 ${isMultiplayer ? 'opacity-50 cursor-not-allowed' : ''} ${mapMode === mode.id ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'}`}
+                    className={`flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 sm:py-3 rounded-md text-xs sm:text-sm font-medium transition-all active:scale-95 ${isMultiplayer ? 'opacity-50 cursor-not-allowed' : ''} ${mapMode === mode.id ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'}`}
                 >
                     <mode.icon className="w-4 h-4" />
                     {mode.label}
@@ -158,17 +158,17 @@ export const Interface: React.FC<Props> = ({
       </div>
 
       {/* Bottom Center: Toolbox */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 w-full max-w-md px-4 pointer-events-none">
-        <div className="bg-slate-900/90 backdrop-blur-xl border border-slate-700 rounded-2xl px-2 py-2 shadow-2xl flex items-center justify-center pointer-events-auto overflow-x-auto">
+      <div className="fixed bottom-4 left-2 right-2 sm:left-1/2 sm:-translate-x-1/2 sm:w-auto z-20 pointer-events-none">
+        <div className="bg-slate-900/90 backdrop-blur-xl border border-slate-700 rounded-2xl px-1 py-1 sm:px-2 sm:py-2 shadow-2xl flex items-center justify-center pointer-events-auto overflow-x-auto">
            {tools.map(t => (
              <button
                key={t.id}
                onClick={() => setTool(t.id)}
-               className={`flex flex-col items-center justify-center min-w-[3.5rem] h-14 rounded-xl transition-all relative mx-0.5 active:scale-95 ${tool === t.id ? 'bg-indigo-600 text-white shadow-lg ring-1 ring-indigo-400/50' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}
+               className={`flex flex-col items-center justify-center min-w-[3rem] sm:min-w-[3.5rem] h-12 sm:h-14 rounded-xl transition-all relative mx-0.5 active:scale-95 ${tool === t.id ? 'bg-indigo-600 text-white shadow-lg ring-1 ring-indigo-400/50' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}
                title={t.label}
              >
-               <t.icon className={`w-6 h-6 mb-0.5 ${tool === t.id ? 'stroke-2' : 'stroke-1.5'}`} />
-               <span className="text-[9px] font-medium tracking-tight">{t.label}</span>
+               <t.icon className={`w-5 h-5 sm:w-6 sm:h-6 mb-0.5 ${tool === t.id ? 'stroke-2' : 'stroke-1.5'}`} />
+               <span className="text-[8px] sm:text-[9px] font-medium tracking-tight">{t.label}</span>
              </button>
            ))}
         </div>
