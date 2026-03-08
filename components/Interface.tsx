@@ -28,6 +28,7 @@ interface Props {
   onGenerate: () => void;
   brushSize: number;
   setBrushSize: (s: number) => void;
+  isConnected?: boolean;
 }
 
 export const Interface: React.FC<Props> = ({
@@ -41,6 +42,7 @@ export const Interface: React.FC<Props> = ({
   onGenerate,
   brushSize,
   setBrushSize,
+  isConnected = true,
 }) => {
   const [showSettings, setShowSettings] = useState(false);
   
@@ -155,6 +157,14 @@ export const Interface: React.FC<Props> = ({
             </div>
             </div>
         )}
+      </div>
+
+      {/* Top Right: Connection Status */}
+      <div className="fixed top-2 right-2 sm:top-4 sm:right-4 z-50 pointer-events-none">
+        <div className="bg-slate-900/90 backdrop-blur-sm border border-slate-700 rounded-full px-3 py-1.5 shadow-xl flex items-center gap-2 pointer-events-auto">
+          <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-red-500 animate-pulse'}`}></div>
+          <span className={`text-[10px] sm:text-xs font-mono font-medium ${isConnected ? 'text-emerald-500' : 'text-red-400'}`}>{isConnected ? 'LIVE' : 'OFFLINE'}</span>
+        </div>
       </div>
 
       {/* Bottom Center: Toolbox */}

@@ -14,9 +14,10 @@ interface RoomSettings {
 interface Props {
   onStart: (mode: MapMode, roomName?: string, settings?: RoomSettings) => void;
   onError?: string;
+  isConnected?: boolean;
 }
 
-export const HomeScreen: React.FC<Props> = ({ onStart, onError }) => {
+export const HomeScreen: React.FC<Props> = ({ onStart, onError, isConnected = false }) => {
   const [view, setView] = useState<'main' | 'join' | 'create'>('main');
   const [roomName, setRoomName] = useState('');
   const [settings, setSettings] = useState<RoomSettings>({
@@ -103,6 +104,10 @@ export const HomeScreen: React.FC<Props> = ({ onStart, onError }) => {
 
   return (
     <div className="w-screen min-h-screen bg-slate-950 flex flex-col items-center justify-center relative overflow-y-auto py-8">
+      <div className="absolute top-4 right-4 flex items-center gap-2 z-50 bg-slate-900/50 px-3 py-1.5 rounded-full border border-slate-800">
+        <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-red-500 animate-pulse'}`}></div>
+        <span className={`text-xs font-mono font-medium ${isConnected ? 'text-emerald-500' : 'text-red-400'}`}>{isConnected ? 'CONNECTED' : 'OFFLINE'}</span>
+      </div>
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-slate-950 to-slate-950 z-0"></div>
       
       <div className="z-10 flex flex-col items-center gap-8 animate-in fade-in zoom-in duration-500">

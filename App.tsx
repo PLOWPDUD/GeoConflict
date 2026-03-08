@@ -59,6 +59,7 @@ export default function App() {
   const [isRunning, setIsRunning] = useState(false);
   const [isMultiplayer, setIsMultiplayer] = useState(false);
   const [roomName, setRoomName] = useState<string | null>(null);
+  const [isConnected, setIsConnected] = useState(socket.connected);
   const [engine, setEngine] = useState<SimulationEngine>(() => createEngine(MapMode.World));
   
   // UI State
@@ -77,6 +78,27 @@ export default function App() {
   // Refs for the loop
   const engineRef = useRef(engine);
   const animationFrameRef = useRef<number>();
+
+  // Socket connection status
+  useEffect(() => {
+    function onConnect() {
+      setIsConnected(true);
+      console.log("Socket connected:", socket.id);
+    }
+
+    function onDisconnect() {
+      setIsConnected(false);
+      console.log("Socket disconnected");
+    }
+
+    socket.on('connect', onConnect);
+    socket.on('disconnect', onDisconnect);
+
+    return () => {
+      socket.off('connect', onConnect);
+      socket.off('disconnect', onDisconnect);
+    };
+  }, []);
 
   // Helper to re-generate map
   const handleGenerate = useCallback(() => {
@@ -356,7 +378,11 @@ export default function App() {
 
 
   if (screen === 'home') {
-      return <HomeScreen onStart={handleStartGame} onError={error || undefined} />;
+      return <HomeScreen 
+        onStart={handleStartGame} 
+        onError={error || (!isConnected ? "Connecting to server..." : undefined)} 
+        isConnected={isConnected}
+      />;
   }
 
   return (
@@ -379,6 +405,7 @@ export default function App() {
         onGenerate={handleGenerate}
         brushSize={brushSize}
         setBrushSize={setBrushSize}
+        isConnected={isConnected}
       />
 
       <CanvasRenderer 

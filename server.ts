@@ -1,7 +1,7 @@
 import express from "express";
-import { createServer as createViteServer } from "vite";
 import { createServer } from "node:http";
 import { Server } from "socket.io";
+import path from "path";
 
 async function startServer() {
   const app = express();
@@ -64,6 +64,7 @@ async function startServer() {
 
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
+    const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
@@ -72,6 +73,10 @@ async function startServer() {
   } else {
     // Production static file serving
     app.use(express.static('dist'));
+    // SPA fallback
+    app.get('*', (req, res) => {
+      res.sendFile(path.resolve('dist/index.html'));
+    });
   }
 
   httpServer.listen(PORT, "0.0.0.0", () => {
